@@ -746,7 +746,7 @@ class Demo:
             if self.pick_only(target_hint=obj, attempts=2):
                 self.place_xy(x, y)
 
-    def pick_place_xy(self, obj: str, x: float, y: float):
+def pick_place_xy(self, obj: str, x: float, y: float):
 
     start_time = time.time()   # ⏱ start timing
 
@@ -760,7 +760,6 @@ class Demo:
 
     ok_place = self.place_xy(float(x), float(y))
 
-    # success condition
     success = 1 if ok_place else 0
 
     end_time = time.time()   # ⏱ end timing
