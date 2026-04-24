@@ -643,44 +643,39 @@ class Demo:
         self._reach_pose(hover, xquat_ref, 0.012, 0.14, 2.0)
         return True
 
-        # ==================== Q9: Add Time Measurement ====================
-    def timed_pick_place_xy(self, obj: str, target_x: float, target_y: float) -> dict:
-        """
-        Runs pick and place while measuring exact time.
-        Returns: {'success': bool, 'time': float, 'duration': str}
-        """
-        print(f"\nStarting timed pick-place: {obj} → ({target_x:.3f}, {target_y:.3f})")
+        # ==================== Q9: SIMPLE TIME MEASUREMENT ====================
+    def timed_pick_place(self, obj: str = "box", target_x: float = 0.55, target_y: float = -0.25):
+        """Run pick and place and print the time clearly in the terminal."""
+        print(f"\n=== TIMED PICK & PLACE STARTED ===")
+        print(f"Object: {obj}  |  Target: ({target_x:.3f}, {target_y:.3f})")
         
-        start_time = time.time()          # ← Start timing here
+        start_time = time.time()                    # ← Start timer
         
-        # Run the normal task (your existing robust function)
+        # Run your existing pick and place
         self.pick_place_xy(obj, target_x, target_y)
         
-        # Small settling time
-        self.wait(0.5)
+        self.wait(0.5)                              # small settle time
         
-        end_time = time.time()            # ← End timing here
-        duration = end_time - start_time
+        end_time = time.time()                      # ← End timer
+        duration = round(end_time - start_time, 2)
         
-        # Simple success check (you can improve this later in Q10)
-        success = False
-        if self.held_obj is None:                     # gripper is open = placed
-            try:
-                obj_pos = self.data.body(obj).xpos
-                target_pos = np.array([target_x, target_y, 0.03])
-                dist = float(np.linalg.norm(obj_pos[:2] - target_pos[:2]))
-                success = dist < 0.08                     # 8cm tolerance (reasonable)
-            except:
-                pass
+        # Simple success check
+        success = self.held_obj is None
+        try:
+            obj_pos = self.data.body(obj).xpos[:2]
+            dist = round(np.linalg.norm(obj_pos - np.array([target_x, target_y])), 3)
+            if dist < 0.07:
+                success = True
+        except:
+            pass
         
-        print(f"Task finished in {duration:.2f} seconds | Success: {success}")
+        print(f"\n=== TASK FINISHED ===")
+        print(f"Time taken: ** {duration} seconds **")
+        print(f"Success: {success} (distance to target: {dist if 'dist' in locals() else 'N/A'} m)")
+        print("============================\n")
         
-        return {
-            "success": success,
-            "time": round(duration, 2),
-            "duration_str": f"{duration:.2f}s"
-        }
-
+        return duration
+        
     def place_on_top_of_body(self, base_name: str) -> bool:
         """Place on top of base (stack). Returns False if drop detected."""
         self.stop_flag.clear()
