@@ -643,6 +643,44 @@ class Demo:
         self._reach_pose(hover, xquat_ref, 0.012, 0.14, 2.0)
         return True
 
+        # ==================== Q9: Add Time Measurement ====================
+    def timed_pick_place_xy(self, obj: str, target_x: float, target_y: float) -> dict:
+        """
+        Runs pick and place while measuring exact time.
+        Returns: {'success': bool, 'time': float, 'duration': str}
+        """
+        print(f"\nStarting timed pick-place: {obj} → ({target_x:.3f}, {target_y:.3f})")
+        
+        start_time = time.time()          # ← Start timing here
+        
+        # Run the normal task (your existing robust function)
+        self.pick_place_xy(obj, target_x, target_y)
+        
+        # Small settling time
+        self.wait(0.5)
+        
+        end_time = time.time()            # ← End timing here
+        duration = end_time - start_time
+        
+        # Simple success check (you can improve this later in Q10)
+        success = False
+        if self.held_obj is None:                     # gripper is open = placed
+            try:
+                obj_pos = self.data.body(obj).xpos
+                target_pos = np.array([target_x, target_y, 0.03])
+                dist = float(np.linalg.norm(obj_pos[:2] - target_pos[:2]))
+                success = dist < 0.08                     # 8cm tolerance (reasonable)
+            except:
+                pass
+        
+        print(f"Task finished in {duration:.2f} seconds | Success: {success}")
+        
+        return {
+            "success": success,
+            "time": round(duration, 2),
+            "duration_str": f"{duration:.2f}s"
+        }
+
     def place_on_top_of_body(self, base_name: str) -> bool:
         """Place on top of base (stack). Returns False if drop detected."""
         self.stop_flag.clear()
