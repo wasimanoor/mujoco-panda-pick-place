@@ -746,7 +746,7 @@ class Demo:
             if self.pick_only(target_hint=obj, attempts=2):
                 self.place_xy(x, y)
 
-def pick_place_xy(self, obj: str, x: float, y: float):
+def pick_place_to_site(self, obj: str, target_site: str) -> None:
 
     start_time = time.time()   # ⏱ start timing
 
